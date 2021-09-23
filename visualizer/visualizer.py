@@ -1,4 +1,4 @@
-from bytecode import Bytecode, Instr
+from bytecode import Bytecode, Instr, FreeVar
 
 class get_local(object):
     cache = {}
@@ -13,10 +13,14 @@ class get_local(object):
 
         type(self).cache[func.__qualname__] = []
         c = Bytecode.from_code(func.__code__)
-        extra_code = [
-                         Instr('LOAD_FAST', self.varname),
-                         Instr('BUILD_TUPLE', 2)
-                     ]
+        extra_code = []
+        if self.varname in func.__code__.co_varnames:
+            extra_code.append(Instr("LOAD_FAST", self.varname))
+        elif self.varname in func.__code__.co_freevars:
+            extra_code.append(Instr("LOAD_DEREF", FreeVar(self.varname)))
+        else:
+            raise NameError(f"{self.varname} not found.")
+        extra_code.append(Instr("BUILD_TUPLE", 2))
         c[-1:-1] = extra_code
         func.__code__ = c.to_code()
 
