@@ -14,14 +14,8 @@ class get_local(object):
         type(self).cache[func.__qualname__] = []
         c = Bytecode.from_code(func.__code__)
         extra_code = [
-                         Instr('STORE_FAST', '_res'),
                          Instr('LOAD_FAST', self.varname),
-                         Instr('STORE_FAST', '_value'),
-                         Instr('LOAD_FAST', '_res'),
-                         Instr('LOAD_FAST', '_value'),
-                         Instr('BUILD_TUPLE', 2),
-                         Instr('STORE_FAST', '_result_tuple'),
-                         Instr('LOAD_FAST', '_result_tuple'),
+                         Instr('BUILD_TUPLE', 2)
                      ]
         c[-1:-1] = extra_code
         func.__code__ = c.to_code()
